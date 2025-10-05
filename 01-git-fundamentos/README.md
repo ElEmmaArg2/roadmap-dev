@@ -35,6 +35,16 @@
  #### En caso que se cree una nueva rama
  
  git checkout -b feature-login `*(crea y cambia a una rama nueva llamada feature-login)*`
- <sub>haces cambios...</sub> </n>
+ --haces cambios...--
  git commit -m "Agrego login"
  git push -u origin feature-login
+
+ #### En caso de que te equivoques o te falto cosas antes de hacer el add .
+
+ git add README.md
+ `-- al archivo le falto cosas --`
+ git reset README.md
+ `-- realizo los cambios --`
+ git add. 
+ git commit -m "Texto descriptivo"
+  
