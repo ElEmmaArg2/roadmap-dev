@@ -10,7 +10,7 @@
 
 - Git commit -m "..."
 
-- Git branch -M main
+- Git branch -M main `*Esto solo si no pusimos el git config --global init.defaultBranch main*`
 
 - Git remoto add origin "Link"
 
@@ -35,6 +35,6 @@
  #### En caso que se cree una nueva rama
  
  git checkout -b feature-login `*(crea y cambia a una rama nueva llamada feature-login)*`
- <sub>haces cambios</sub>
+ <sub>haces cambios...</sub> </n>
  git commit -m "Agrego login"
  git push -u origin feature-login
