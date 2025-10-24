@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Coding Assignment</title>
+
+        <style>
+            body {
+                font-family: sf pro text, -apple-system, BlinkMacSystemFont, Roboto, segoe ui, Helvetica, Arial,
+                    sans-serif, apple color emoji, segoe ui emoji, segoe ui symbol;
+                font-weight: 400;
+                line-height: 22.4px;
+                font-size: 16px;
+            }
+            p,
+            ul,
+            ol {
+                font-size: 16px;
+                font-weight: 400;
+            }
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-weight: bold;
+            }
+            ul {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                max-width: none;
+            }
+            .code-snippet {
+                background-color: #fff;
+                border: 1px solid #d1d7dc;
+                color: #b4690e;
+                font-size: 90%;
+                padding: 0.2rem 0.4rem;
+            }
+            .code-block {
+                background-color: #fff;
+                color: #b4690e;
+                font-size: 90%;
+            }
+            .black-block {
+                color: #000000;
+            }
+            .italic-text {
+                font-style: italic;
+            }
+        </style>
+    </head>
+
+    <body onload="main()">
+        <h1 id="coding-title"></h1>
+        <div>
+            <h2>Instructions</h2>
+            <div id="coding-instructions"></div>
+        </div>
+        <div>
+            <h2>Test(s)</h2>
+            <div id="coding-tests"></div>
+        </div>
+        <div>
+            <h2>Solution(s)</h2>
+            <div id="coding-solutions"></div>
+        </div>
+
+        <script>
+            const quizData = {"title": "015 Pr\u00e1ctica Input 2", "hasInstructions": true, "hasTests": true, "hasSolutions": true, "instructions": "<p>Crea un c\u00f3digo que le permita ingresar una respuesta al usuario, haci\u00e9ndole la siguiente pregunta:</p><p><code><strong>\u00bfEn qu\u00e9 pa\u00eds vives?</strong></code></p><p>El c\u00f3digo debe poder imprimir en pantalla lo ingresado por el usuario (utilizando print).</p><p><em>Aclaraci\u00f3n: </em></p><p><em>1. no deben imprimirse strings adicionales a la respuesta del usuario.</em></p><p>2. Los ejercicios que contienen el la funci\u00f3n <code>input()</code> deben ser probados con el bot\u00f3n: <strong>\"Ejecutar pruebas\".&nbsp; </strong>Ya que el bot\u00f3n <strong>\"Ejecutar c\u00f3digo\"</strong> arrojar\u00e1 el siguiente error: <strong>\"EOF when reading a line\"</strong>.</p><p><em>\u00bfA\u00fan tienes dudas acerca de por qu\u00e9 el m\u00f3dulo de evaluaci\u00f3n no acepta tu respuesta? Hemos incluido al final de cada secci\u00f3n posibles respuestas a cada uno de los ejercicios. Confiamos en que puedas recurrir a ellas para detectar diferencias r\u00e1pidamente, evitando que pierdas el tiempo o debas esperar por una respuesta a tu pregunta. Si a\u00fan as\u00ed tienes dudas a resolver, puede ser una buena oportunidad para repasar la lecci\u00f3n en cuesti\u00f3n, o utilizar el espacio de Preguntas y Respuestas que tienes a tu disposici\u00f3n. Muchos \u00e9xitos!</em></p>", "tests": [{"file_name": "evaluate.py", "content": "import sys\nfrom unittest import TestCase\nimport io\n\nclass Evaluate(TestCase):\n    def test_exercise(self):\n        sys.stdin = io.StringIO(' ')\n        import exercise\n        output = sys.stdout.getvalue().replace(\" \",\"\").lower()\n        self.assertEqual('\u00bfenqu\u00e9pa\u00edsvives?\\n', output,\n                         'Debes preguntarle al usuario \"\u00bfEn qu\u00e9 pa\u00eds vives?\", e imprimir su respuesta')\n"}], "solutions": [{"file_name": "exercise.py", "content": "print(input(\"\u00bfEn qu\u00e9 pa\u00eds vives?\"))"}]};
+
+            function renderCodeList(rootElement, codeList, className, titlePrefix) {
+                for (var i = 0; i < codeList.length; i++) {
+                    var elem = codeList[i];
+                    var jsElem = document.createElement("div");
+                    jsElem.className = className;
+                    var jsElemTitle = document.createElement("h3");
+                    jsElemTitle.innerHTML = titlePrefix + " " + (i + 1);
+                    var jsElemBody = document.createElement("code");
+                    jsElemBody.className = "code-block black-block";
+                    jsElemBody.innerHTML = "<pre>" + elem.content + "</pre>";
+                    jsElem.appendChild(jsElemTitle);
+                    jsElem.appendChild(jsElemBody);
+                    rootElement.appendChild(jsElem);
+                }
+            }
+
+            function main() {
+                // display the assignment
+                var codingTitle = document.getElementById("coding-title");
+                codingTitle.innerHTML = quizData.title;
+
+                var codingInstructions = document.getElementById("coding-instructions");
+                if (quizData.hasInstructions) {
+                    codingInstructions.innerHTML = quizData.instructions;
+                } else {
+                    codingInstructions.innerHTML = '<span class="italic-text">' + quizData.instructions + "</span>";
+                }
+
+                // display the test(s)
+                var codingTests = document.getElementById("coding-tests");
+                if (!quizData.hasTests) {
+                    codingTests.innerHTML = '<span class="italic-text">' + quizData.tests + "</span>";
+                } else {
+                    renderCodeList(codingTests, quizData.tests, "coding-test", "Test");
+                }
+
+                // display the solution(s)
+                var codingSolutions = document.getElementById("coding-solutions");
+                if (!quizData.hasSolutions) {
+                    codingSolutions.innerHTML = '<span class="italic-text">' + quizData.solutions + "</span>";
+                } else {
+                    renderCodeList(codingSolutions, quizData.solutions, "coding-solution", "Solution");
+                }
+            }
+        </script>
+    </body>
+</html>
