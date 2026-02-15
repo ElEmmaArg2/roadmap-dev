@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Kari — San Valentín ✨ Monserrate</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --night-deep: #0a0a1a;
+            --night-mid: #12122a;
+            --night-soft: #1a1a3a;
+            --accent-violet: #6b5b95;
+            --accent-indigo: #4a4a8a;
+            --silver: rgba(220, 220, 255, 0.9);
+            --gold: rgba(212, 175, 55, 0.85);
+            --mist: rgba(180, 190, 220, 0.08);
+            --hxh-green: #3f9142;
+            --given-blue: #4a90e2;
+            --solo-purple: #8b5cf6;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { 
+                animation-duration: 0.01ms !important; 
+                animation-iteration-count: 1 !important; 
+                transition-duration: 0.01ms !important; 
+            }
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, var(--night-deep) 0%, var(--night-mid) 40%, var(--night-soft) 70%, var(--night-deep) 100%);
+            color: var(--silver);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+        }
+
+        /* ========== MONTAÑA DE FONDO (efecto Monserrate) ========== */
+        .mountain-silhouette {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.15;
+        }
+        .mountain-silhouette svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ========== EFECTO NIEBLA ANIMADA ========== */
+        .fog {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: linear-gradient(to top, rgba(180, 190, 220, 0.15), transparent);
+            animation: fogDrift 20s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+        @keyframes fogDrift {
+            0%, 100% { opacity: 0.15; transform: translateX(0); }
+            50% { opacity: 0.25; transform: translateX(30px); }
+        }
+
+        /* ========== PIEDRAS/ROCAS FLOTANTES (escalada) ========== */
+        .rocks-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .rock {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(135deg, rgba(100, 100, 120, 0.3), rgba(80, 80, 100, 0.2));
+            border-radius: 30% 40% 35% 45%;
+            opacity: 0;
+            animation: rockFall 15s ease-in-out infinite;
+        }
+        @keyframes rockFall {
+            0% { opacity: 0; transform: translateY(-100px) rotate(0deg); }
+            10% { opacity: 0.4; }
+            90% { opacity: 0.2; }
+            100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+        }
+
+        /* ========== Capas: estado por defecto ========== */
+        .layer {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            z-index: 10;
+        }
+        .layer.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        /* ========== Fondo común: estrellas + bruma ========== */
+        .bg-stars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.25; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+        }
+        .mist {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% 20%, var(--mist), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ========== CAPA 0 — Preloader ========== */
+        .preloader-text {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--silver);
+            text-align: center;
+            max-width: 320px;
+            margin-bottom: 1.5rem;
+        }
+        .preloader-bar {
+            width: 160px;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .preloader-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent-violet), var(--gold));
+            border-radius: 3px;
+            animation: load 2.5s ease-in-out forwards;
+        }
+        @keyframes load {
+            to { width: 100%; }
+        }
+        .btn-skip {
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: var(--silver);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .btn-skip:hover { 
+            background: rgba(255,255,255,0.1); 
+            border-color: rgba(255,255,255,0.6); 
+        }
+
+        /* ========== CAPA 1 — Hero ========== */
+        .hero-title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            color: white;
+            animation: titleGlow 4s ease-in-out infinite;
+        }
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 20px rgba(107, 91, 149, 0.4), 0 0 40px rgba(212, 175, 55, 0.15); }
+            50% { text-shadow: 0 0 28px rgba(107, 91, 149, 0.6), 0 0 50px rgba(212, 175, 55, 0.25); }
+        }
+        .hero-sub {
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            text-align: center;
+            max-width: 420px;
+            margin-bottom: 2rem;
+            color: rgba(220, 220, 255, 0.85);
+        }
+        .hero-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .btn {
+            padding: 0.85rem 1.6rem;
+            border-radius: 999px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            min-height: 48px;
+            position: relative;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-indigo));
+            color: white;
+            box-shadow: 0 4px 20px rgba(107, 91, 149, 0.4);
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 24px rgba(107, 91, 149, 0.5); 
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%);
+            background-size: 200% 200%;
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: -1;
+            pointer-events: none;
+        }
+        .btn-primary:hover::after {
+            opacity: 1;
+            animation: btnShine 1.2s ease-in-out;
+        }
+        @keyframes btnShine {
+            0% { background-position: 200% 50%; }
+            100% { background-position: -200% 50%; }
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--silver);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-secondary.active { border-color: var(--gold); color: var(--gold); }
+
+        /* Constelación interactiva */
+        .constellation-wrap {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 80px;
+        }
+        .constellation-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+        .constellation-wrap .star-dot {
+            fill: rgba(255,255,255,0.4);
+            transition: fill 0.3s, filter 0.3s;
+        }
+        .constellation-wrap:hover .star-dot,
+        .constellation-wrap.touched .star-dot { 
+            fill: var(--silver); 
+            filter: drop-shadow(0 0 6px rgba(212,175,55,0.6)); 
+        }
+
+        /* ========== PASOS CON REFERENCIAS A ANIMES ========== */
+        .phase-visual {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+        }
+        .phase-visual-gradient {
+            width: 100%;
+            height: 100%;
+            transition: background 0.8s ease;
+        }
+        
+        .phase-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, 
+                rgba(10,10,26,0.95) 0%, 
+                rgba(10,10,26,0.7) 20%,
+                rgba(10,10,26,0.4) 50%, 
+                transparent 80%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .phase-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 100%;
+            padding: 2rem 1.5rem 3rem;
+            text-align: center;
+        }
+        .layer .phase-content {
+            animation: phaseIn 0.7s ease forwards;
+        }
+        @keyframes phaseIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ========== INDICADORES DE MONTAÑA ========== */
+        .altitude-indicator {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gold);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        .altitude-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+        .altitude-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+        }
+        
+        /* Barra de progreso vertical */
+        .mountain-progress {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .mountain-progress-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--accent-violet), var(--gold));
+            transition: height 0.6s ease;
+            border-radius: 2px;
+        }
+        
+        /* Marcadores de puntos */
+        .mountain-markers {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 11;
+        }
+        .mountain-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .mountain-marker.passed {
+            background: var(--accent-violet);
+            border-color: var(--accent-violet);
+            box-shadow: 0 0 10px var(--accent-violet);
+        }
+        .mountain-marker.current {
+            background: var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            transform: scale(1.3);
+        }
+        .mountain-marker::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            color: rgba(255,255,255,0.7);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mountain-marker.current::after,
+        .mountain-marker:hover::after {
+            opacity: 1;
+        }
+
+        /* ========== ICONOS DE ANIMES ========== */
+        .anime-icon {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.2);
+            animation: iconFloat 3s ease-in-out infinite;
+            z-index: 10;
+        }
+        @keyframes iconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        .paso-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+        .paso-text {
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
+            text-align: center;
+            max-width: 420px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--silver);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+        .paso-ref {
+            font-size: 0.8rem;
+            color: rgba(220,220,255,0.6);
+            margin-top: 0.5rem;
+        }
+
+        /* ========== Portal / transición ========== */
+        .portal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: radial-gradient(ellipse at center, transparent 0%, var(--night-deep) 70%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 1s ease, visibility 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .portal-overlay .message {
+            color: var(--silver);
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            text-align: center;
+            max-width: 320px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
+        }
+        .portal-overlay.active .message { opacity: 1; transform: scale(1); }
+        .portal-overlay.zoom .message { opacity: 0; }
+        .portal-overlay.zoom { background: var(--night-deep); }
+        
+        .portal-universe-iframe {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 10001;
+            background: #0a0a2a;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .portal-universe-iframe.visible {
+            display: block;
+            opacity: 1;
+        }
+        .portal-overlay.hide-for-iframe {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        /* Notas musicales (modo música) */
+        .note-float {
+            position: fixed;
+            font-size: 1.5rem;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 2;
+            animation: noteDrift 8s linear infinite;
+        }
+        @keyframes noteDrift {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(180deg); opacity: 0; }
+        }
+
+        /* Corazones flotantes */
+        .hearts-float {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+        .heart-float {
+            position: absolute;
+            font-size: 1rem;
+            opacity: 0;
+            animation: heartFloat 12s ease-in-out infinite;
+            filter: drop-shadow(0 0 4px rgba(255, 105, 180, 0.4));
+        }
+        .heart-float:nth-child(odd) { color: #ff6b9d; }
+        .heart-float:nth-child(even) { color: #c44569; }
+        @keyframes heartFloat {
+            0% { transform: translateY(100vh) translateX(0) rotate(0deg) scale(0.5); opacity: 0; }
+            8% { opacity: 0.35; }
+            50% { transform: translateY(30vh) translateX(30px) rotate(180deg) scale(1); opacity: 0.5; }
+            92% { opacity: 0.25; }
+            100% { transform: translateY(-20vh) translateX(-20px) rotate(360deg) scale(0.6); opacity: 0; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .altitude-indicator { top: 1rem; right: 1rem; font-size: 0.75rem; }
+            .altitude-number { font-size: 1.2rem; }
+            .mountain-progress, .mountain-markers { height: 50%; }
+            .anime-icon { width: 40px; height: 40px; font-size: 1.4rem; }
+        }
+        
+        @media (max-width: 360px) {
+            .hero-btns { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+        .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* Accesorios amor a distancia */
+        .accesorios-distancia {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.9;
+        }
+        .accesorios-distancia svg {
+            width: 36px;
+            height: 36px;
+            animation: accesoriosFloat 4s ease-in-out infinite;
+        }
+        .accesorios-distancia svg:nth-child(1) { animation-delay: 0s; }
+        .accesorios-distancia svg:nth-child(2) { animation-delay: 0.5s; }
+        .accesorios-distancia svg:nth-child(3) { animation-delay: 1s; }
+        .accesorios-distancia svg:nth-child(4) { animation-delay: 1.5s; }
+        .accesorios-distancia svg:nth-child(5) { animation-delay: 2s; }
+        @keyframes accesoriosFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .music-credit {
+            position: fixed;
+            bottom: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.4);
+            z-index: 6;
+        }
+
+        /* ========== EFECTOS ADICIONALES ========== */
+        /* Partículas flotantes */
+        .step-particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+        @keyframes particleFloat {
+            0% { opacity: 0; transform: translateY(100vh) translateX(0); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.4; }
+            100% { opacity: 0; transform: translateY(-20vh) translateX(50px); }
+        }
+
+        /* Pulso en indicador de altitud mejorado */
+        .altitude-number {
+            animation: altitudePulse 2s ease-in-out infinite;
+        }
+        @keyframes altitudePulse {
+            0%, 100% { transform: scale(1); text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+            50% { transform: scale(1.05); text-shadow: 0 0 20px var(--gold), 0 2px 8px rgba(0,0,0,0.8); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Música de Given: fondo unificado -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="given.mp3" type="audio/mpeg">
+        <source src="music/fuyu-no-hanashi.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="bg-stars" id="bg-stars"></div>
+    <div class="mist"></div>
+    <div class="fog"></div>
+    <div class="hearts-float" id="hearts-float"></div>
+    <div class="rocks-container" id="rocks-container"></div>
+
+    <!-- Silueta de montaña (Monserrate) -->
+    <div class="mountain-silhouette">
+        <svg viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 300 L0 200 Q150 150 300 180 T600 120 Q750 80 900 140 T1200 180 L1200 300 Z" 
+                  fill="rgba(40, 40, 60, 0.3)"/>
+            <path d="M0 300 L0 220 Q200 180 400 200 T800 160 Q950 140 1200 200 L1200 300 Z" 
+                  fill="rgba(30, 30, 50, 0.2)"/>
+        </svg>
+    </div>
+
+    <!-- Accesorios: amor a distancia — Argentina ↔ Colombia -->
+    <div class="accesorios-distancia">
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#75AADB" stroke="white" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="white" font-size="12">AR</text></svg>
+        <svg viewBox="0 0 36 36"><path d="M4 18 L32 18 M18 4 L32 18 L18 32 Z" fill="none" stroke="white" stroke-width="2"/></svg>
+        <svg viewBox="0 0 36 36"><path d="M18 8 C18 8 10 14 10 20 C10 26 14 28 18 28 C22 28 26 26 26 20 C26 14 18 8 18 8 Z" fill="#E74856" stroke="white" stroke-width="2"/></svg>
+        <svg viewBox="0 0 36 36"><path d="M4 18 L32 18 M18 4 L32 18 L18 32 Z" fill="none" stroke="white" stroke-width="2"/></svg>
+        <svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FCD116" stroke="white" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="white" font-size="12">CO</text></svg>
+    </div>
+    <p class="music-credit" id="music-credit">♪ Given - Fuyu no Hanashi</p>
+
+    <!-- CAPA 0 — Preloader -->
+    <section class="layer active" id="layer0">
+        <p class="preloader-text">Acomodá el brillo… esto es para vos, Kari.</p>
+        <div class="preloader-bar">
+            <div class="preloader-fill" id="preloader-fill"></div>
+        </div>
+        <button type="button" class="btn-skip" id="skip-intro">Saltar</button>
+    </section>
+
+    <!-- CAPA 1 — Hero -->
+    <section class="layer" id="layer1">
+        <div class="constellation-wrap" id="constellation">
+            <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <line x1="20" y1="40" x2="50" y2="20" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="50" y1="20" x2="70" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="70" y1="50" x2="100" y2="40" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <circle class="star-dot" cx="20" cy="40" r="3"/>
+                <circle class="star-dot" cx="50" cy="20" r="3"/>
+                <circle class="star-dot" cx="70" cy="50" r="3"/>
+                <circle class="star-dot" cx="100" cy="40" r="3"/>
+            </svg>
+        </div>
+        <h1 class="hero-title">Kari, subamos a Monserrate.</h1>
+        <p class="hero-sub">3.152 metros. 1.605 escalones. Bogotá nos espera arriba — y algo más.</p>
+        <div class="hero-btns">
+            <button type="button" class="btn btn-primary" id="start-walk">Empezar subida 🏔️</button>
+            <button type="button" class="btn btn-secondary" id="toggle-music">Música de Given ♪</button>
+        </div>
+    </section>
+
+    <!-- PASO 1: Base -->
+    <section class="layer" id="layer2">
+        <div class="phase-visual">
+            <div class="phase-visual-gradient" style="background: linear-gradient(to bottom, #1a1a3a 0%, #2a2a4a 60%, #3a3a5a 100%);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="anime-icon" style="background: rgba(212, 175, 55, 0.2);">⛰️</div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.550m</div>
+            <div class="altitude-label">Base</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 0%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker" data-label="Mirador"></div>
+            <div class="mountain-marker" data-label="Camino"></div>
+            <div class="mountain-marker current" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 1 — Base del cerro</p>
+            <p class="paso-text">2.350 metros de sendero. 1.605 escalones. La ciudad queda abajo y la cima arriba. <span class="paso-ref">Monserrate, Bogotá 🇨🇴</span></p>
+            <button type="button" class="btn btn-primary" data-next="3">Empezar a subir →</button>
+        </div>
+    </section>
+    
+    <!-- PASO 2: Camino (Hunter x Hunter) -->
+    <section class="layer" id="layer3">
+        <div class="phase-visual">
+            <div class="phase-visual-gradient" style="background: linear-gradient(to bottom, #2a3a2a 0%, #1a2a1a 60%, #2a3a3a 100%);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="anime-icon" style="background: rgba(63, 145, 66, 0.3); border-color: var(--hxh-green);">🎣</div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.700m</div>
+            <div class="altitude-label">En ascenso</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 25%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker" data-label="Mirador"></div>
+            <div class="mountain-marker current" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 2 — En el camino</p>
+            <p class="paso-text">En mi próxima vida, quiero ser yo y conocerte de nuevo. <span class="paso-ref">🎯 Hunter x Hunter — Gon a Killua</span></p>
+            <button type="button" class="btn btn-primary" data-next="4">Continuar subiendo →</button>
+        </div>
+    </section>
+    
+    <!-- PASO 3: Mirador (Given) -->
+    <section class="layer" id="layer4">
+        <div class="phase-visual">
+            <div class="phase-visual-gradient" style="background: linear-gradient(to bottom, #2a3a4a 0%, #1a2a3a 60%, #3a4a5a 100%);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="anime-icon" style="background: rgba(74, 144, 226, 0.3); border-color: var(--given-blue);">🎸</div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.850m</div>
+            <div class="altitude-label">Mirador</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 50%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker current" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 3 — Mirador</p>
+            <p class="paso-text">El corazón es como estas cuerdas. Si alguien te las reemplaza, tus heridas pueden sanar. <span class="paso-ref">🎵 Given — Uenoyama a Mafuyu</span></p>
+            <button type="button" class="btn btn-primary" data-next="5">Ya casi llegamos →</button>
+        </div>
+    </section>
+    
+    <!-- PASO 4: Último tramo (Solo Leveling) -->
+    <section class="layer" id="layer5">
+        <div class="phase-visual">
+            <div class="phase-visual-gradient" style="background: linear-gradient(to bottom, #3a2a4a 0%, #2a1a3a 60%, #4a3a5a 100%);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="anime-icon" style="background: rgba(139, 92, 246, 0.3); border-color: var(--solo-purple);">⚔️</div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">3.000m</div>
+            <div class="altitude-label">Último tramo</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 75%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker current" data-label="Último"></div>
+            <div class="mountain-marker passed" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 4 — Último tramo</p>
+            <p class="paso-text">Hasta el final, como al principio. Sin rendirse nunca. <span class="paso-ref">⚔️ El mejor ingeniero del mundo</span></p>
+            <button type="button" class="btn btn-primary" data-next="6">¡A la cima! →</button>
+        </div>
+    </section>
+    
+    <!-- PASO 5: Cima -->
+    <section class="layer" id="layer6">
+        <div class="phase-visual">
+            <div class="phase-visual-gradient" style="background: linear-gradient(to bottom, #4a4a6a 0%, #3a3a5a 60%, #5a5a7a 100%);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="anime-icon" style="background: rgba(212, 175, 55, 0.4); border-color: var(--gold);">✨</div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">3.152m</div>
+            <div class="altitude-label">¡Cima!</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 100%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker current" data-label="Cima"></div>
+            <div class="mountain-marker passed" data-label="Último"></div>
+            <div class="mountain-marker passed" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Cima — Monserrate</p>
+            <p class="paso-text">Desde acá Bogotá es un mapa de luces. Y lo que importa es que llegamos juntos. <span class="paso-ref">💕 Kari</span></p>
+            <button type="button" class="btn btn-primary" id="go-summit">Ver nuestro universo ✦</button>
+        </div>
+    </section>
+
+    <!-- Portal -->
+    <div class="portal-overlay" id="portal">
+        <p class="message">Llegamos, Kari… mirá nuestro universo.</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+    <script>
+        // ========== CONFIGURACIÓN ==========
+        const CONFIG = {
+            preloaderDuration: 2800,
+            portalMessageDelay: 2200,
+            portalZoomDelay: 3800,
+            musicVolume: 0.5
+        };
+
+        // ========== STATE ==========
+        let state = 0;
+        const layers = Array.from({ length: 7 }, (_, i) => document.getElementById('layer' + i));
+        let musicMode = true;  // música de fondo activa por defecto
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function goToLayer(n) {
+            if (n < 0 || n >= layers.length) return;
+            layers.forEach((el, i) => {
+                if (el) el.classList.toggle('active', i === n);
+            });
+            state = n;
+        }
+
+        // ========== ESTRELLAS ==========
+        function createBgStars() {
+            const container = document.getElementById('bg-stars');
+            if (!container) return;
+            
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'bg-star';
+                const size = 1 + Math.random() * 2;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                const delay = Math.random() * 4;
+                const duration = 3 + Math.random() * 3;
+                
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = left + '%';
+                star.style.top = top + '%';
+                star.style.animationDelay = delay + 's';
+                star.style.animationDuration = duration + 's';
+                
+                container.appendChild(star);
+            }
+        }
+
+        // ========== CORAZONES ==========
+        function createFloatingHearts() {
+            if (reduceMotion) return;
+            const container = document.getElementById('hearts-float');
+            if (!container) return;
+            const symbols = ['❤', '♥', '💕', '💗'];
+            
+            for (let i = 0; i < 14; i++) {
+                const heart = document.createElement('span');
+                heart.className = 'heart-float';
+                heart.textContent = symbols[i % symbols.length];
+                const left = Math.random() * 100;
+                const delay = Math.random() * 12;
+                const duration = 10 + Math.random() * 6;
+                const fontSize = 0.75 + Math.random() * 0.8;
+                
+                heart.style.left = left + '%';
+                heart.style.animationDelay = delay + 's';
+                heart.style.animationDuration = duration + 's';
+                heart.style.fontSize = fontSize + 'rem';
+                
+                container.appendChild(heart);
+            }
+        }
+
+        // ========== ROCAS ==========
+        function createRocks() {
+            if (reduceMotion) return;
+            const container = document.getElementById('rocks-container');
+            if (!container) return;
+            
+            for (let i = 0; i < 8; i++) {
+                const rock = document.createElement('div');
+                rock.className = 'rock';
+                const left = Math.random() * 100;
+                const delay = Math.random() * 15;
+                const duration = 12 + Math.random() * 8;
+                
+                rock.style.left = left + '%';
+                rock.style.animationDelay = delay + 's';
+                rock.style.animationDuration = duration + 's';
+                
+                container.appendChild(rock);
+            }
+        }
+
+        // ========== CONFETTI ==========
+        function fireConfetti() {
+            if (reduceMotion || typeof confetti !== 'function') return;
+            const opts = {
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#ff6b9d', '#c44569', '#6b5b95', '#ffd93d', '#fff']
+            };
+            confetti(opts);
+            setTimeout(function() {
+                confetti({ ...opts, particleCount: 60, spread: 100, origin: { x: 0.3, y: 0.7 } });
+                confetti({ ...opts, particleCount: 60, spread: 100, origin: { x: 0.7, y: 0.7 } });
+            }, 250);
+        }
+
+        // ========== PRELOADER ==========
+        function initPreloader() {
+            const preloaderFill = document.getElementById('preloader-fill');
+            const skipBtn = document.getElementById('skip-intro');
+            
+            function finishPreload() {
+                if (preloaderFill) {
+                    preloaderFill.style.animation = 'none';
+                    preloaderFill.style.width = '100%';
+                }
+                goToLayer(1);
+            }
+            
+            if (!reduceMotion) {
+                const timer = setTimeout(finishPreload, CONFIG.preloaderDuration);
+                if (skipBtn) {
+                    skipBtn.addEventListener('click', function() {
+                        clearTimeout(timer);
+                        finishPreload();
+                    });
+                }
+            } else {
+                finishPreload();
+            }
+        }
+
+        // ========== NAVEGACIÓN ==========
+        function initNavigation() {
+            const startBtn = document.getElementById('start-walk');
+            if (startBtn) {
+                startBtn.addEventListener('click', function() { goToLayer(2); });
+            }
+            
+            const nextBtns = document.querySelectorAll('.layer .btn-primary[data-next]');
+            nextBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const next = parseInt(btn.getAttribute('data-next'), 10);
+                    goToLayer(next);
+                });
+            });
+            
+            document.addEventListener('keydown', function(e) {
+                if (state >= 2 && state <= 5 && (e.key === 'ArrowRight' || e.key === ' ')) {
+                    e.preventDefault();
+                    goToLayer(state + 1);
+                }
+            });
+        }
+
+        // ========== MÚSICA (fondo unificado) ==========
+        function initMusic() {
+            const bgMusic = document.getElementById('bg-music');
+            const musicCredit = document.getElementById('music-credit');
+            const toggleMusic = document.getElementById('toggle-music');
+            let noteInterval;
+            
+            function startBackgroundMusic() {
+                if (!bgMusic) return;
+                bgMusic.volume = CONFIG.musicVolume;
+                bgMusic.play().catch(function() { /* autoplay bloqueado, se intentará con el primer click */ });
+            }
+            
+            function startNoteFloats() {
+                if (noteInterval) return;
+                const notes = ['♪', '♫', '♬', '♩'];
+                noteInterval = setInterval(function() {
+                    const note = document.createElement('span');
+                    note.className = 'note-float';
+                    note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                    note.style.left = Math.random() * 100 + '%';
+                    note.style.animationDuration = (6 + Math.random() * 4) + 's';
+                    note.style.animationDelay = (-Math.random() * 2) + 's';
+                    document.body.appendChild(note);
+                    setTimeout(function() { if (note.parentNode) note.remove(); }, 10000);
+                }, 1200);
+            }
+            
+            function stopNoteFloats() {
+                if (noteInterval) { clearInterval(noteInterval); noteInterval = null; }
+            }
+            
+            // Crédito visible cuando la música está activa
+            if (musicCredit) musicCredit.style.display = musicMode ? 'block' : 'none';
+            if (toggleMusic) toggleMusic.classList.toggle('active', musicMode);
+            
+            // Intentar reproducir de fondo al cargar (algunos navegadores lo permiten)
+            startBackgroundMusic();
+            
+            // Si el navegador bloquea autoplay, iniciar con el primer click del usuario
+            function onFirstInteraction() {
+                if (bgMusic && bgMusic.paused && musicMode) startBackgroundMusic();
+                document.removeEventListener('click', onFirstInteraction);
+                document.removeEventListener('touchstart', onFirstInteraction);
+                document.removeEventListener('keydown', onFirstInteraction);
+            }
+            document.addEventListener('click', onFirstInteraction, { once: true });
+            document.addEventListener('touchstart', onFirstInteraction, { once: true });
+            document.addEventListener('keydown', onFirstInteraction, { once: true });
+            
+            if (toggleMusic) {
+                toggleMusic.addEventListener('click', function() {
+                    musicMode = !musicMode;
+                    toggleMusic.classList.toggle('active', musicMode);
+                    
+                    if (musicMode) {
+                        startBackgroundMusic();
+                        if (musicCredit) musicCredit.style.display = 'block';
+                        startNoteFloats();
+                    } else {
+                        if (bgMusic) bgMusic.pause();
+                        if (musicCredit) musicCredit.style.display = 'none';
+                        stopNoteFloats();
+                    }
+                });
+            }
+            
+            // Efecto de notas flotantes solo cuando la música está activa
+            if (musicMode) startNoteFloats();
+        }
+
+        // ========== CONSTELACIÓN ==========
+        function initConstellation() {
+            const constellation = document.getElementById('constellation');
+            if (!constellation) return;
+            
+            constellation.addEventListener('mouseenter', function() { 
+                constellation.classList.add('touched'); 
+            });
+            constellation.addEventListener('mouseleave', function() { 
+                constellation.classList.remove('touched'); 
+            });
+            constellation.addEventListener('touchstart', function() { 
+                constellation.classList.add('touched'); 
+            }, { passive: true });
+        }
+
+        // ========== PORTAL ==========
+        function initPortal() {
+            const goSummitBtn = document.getElementById('go-summit');
+            const portal = document.getElementById('portal');
+            
+            if (goSummitBtn) {
+                goSummitBtn.addEventListener('click', function() {
+                    fireConfetti();
+                    if (portal) portal.classList.add('active');
+                    
+                    setTimeout(function() {
+                        if (portal) portal.classList.add('zoom');
+                        const msg = portal.querySelector('.message');
+                        if (msg) msg.textContent = '';
+                    }, CONFIG.portalMessageDelay);
+                    
+                    setTimeout(function() {
+                        loadUniverse();
+                    }, CONFIG.portalZoomDelay);
+                });
+            }
+        }
+
+        function loadUniverse() {
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'universe-iframe';
+                iframe.className = 'portal-universe-iframe';
+                iframe.title = 'Sistema Solar del Amor';
+                iframe.srcdoc = getUniverseHTML();
+                document.body.appendChild(iframe);
+                
+                setTimeout(function() {
+                    iframe.classList.add('visible');
+                    const portal = document.getElementById('portal');
+                    if (portal) portal.classList.add('hide-for-iframe');
+                }, 100);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function getUniverseHTML() {
+            return '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sistema Solar del Amor</title><style>*{margin:0;padding:0;box-sizing:border-box}body{overflow:hidden;height:100vh;background:linear-gradient(to bottom,#0a0a2a,#1a1a4a,#0a0a2a);color:#fff;font-family:Arial,sans-serif}.solar-system{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100vmax;height:100vmax}.stars{position:absolute;inset:0}.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle linear infinite}@keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}.sun{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;display:flex;justify-content:center;align-items:center;z-index:200}.heart{position:relative;width:100px;height:100px;transform:rotate(45deg);background:linear-gradient(135deg,#ff6ea3,#ff3d6e);box-shadow:0 0 30px rgba(255,90,140,.6);animation:heartPulse 1.8s ease-in-out infinite;border-radius:6px}.heart:after,.heart:before{content:"";position:absolute;width:100px;height:100px;border-radius:50%;background:inherit}.heart:before{top:-50px;left:0}.heart:after{left:50px;top:0}@keyframes heartPulse{0%,100%{transform:rotate(45deg) scale(1)}50%{transform:rotate(45deg) scale(1.12)}}.orbit{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border:1px solid rgba(255,255,255,.1);border-radius:50%}.planet{position:absolute;border-radius:50%;cursor:pointer;transition:transform .3s;box-shadow:0 0 10px rgba(255,255,255,.5)}.planet:hover{transform:scale(1.5);z-index:100}.floating-phrase{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(1rem,2.5vw,1.5rem);text-align:center;max-width:80%;opacity:0;transition:opacity 1s;text-shadow:0 0 10px rgba(255,255,255,.5);pointer-events:none;z-index:1000}.floating-phrase.visible{opacity:1}.modal{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity .5s;z-index:2000}.modal.active{opacity:1;pointer-events:all}.modal-content{background:linear-gradient(135deg,#2c1b47,#1a1a4a);padding:30px;border-radius:20px;max-width:500px;width:80%;text-align:center}.modal-close{position:absolute;top:15px;right:15px;background:0 0;border:none;color:#fff;font-size:24px;cursor:pointer}</style></head><body><div class="stars" id="stars"></div><div class="floating-phrase" id="floating-phrase"></div><div class="solar-system"><div class="sun"><div class="heart"></div></div><div id="orbits-container"></div></div><div class="modal" id="modal"><div class="modal-content"><button class="modal-close" id="modal-close">&times;</button><p id="modal-text"></p></div></div><script>const phrases=["Desde que llegaste a mi vida, todo tiene sentido.","A tu lado descubrí que el amor verdadero existe.","Nuestro amor es como el universo: infinito y lleno de maravillas.","Eres la melodía que alegra mi corazón.","Amo cada parte de ti: tu sonrisa, tu voz, tu mirada.","Entre miles de millones de personas, encontré a mi alma gemela.","Prometo amarte en cada vida, en cada universo.","Eres mi hogar, mi paz, mi todo."],floatingPhrases=["Cada estrella es un momento que vivimos juntos","En este universo infinito, elegí amarte a vos","Las distancias no importan cuando los corazones están conectados","Argentina y Colombia, dos mundos unidos por amor","Subimos montañas, cruzamos océanos, todo por estar juntos","Hunter x Hunter nos enseñó la amistad, Given la música del corazón","Solo Leveling nos mostró que nunca hay que rendirse","Sos mi nivel up constante, mi mejor aventura","Como Gon y Killua, juntos hasta el final","Como Mafuyu encontró su voz, yo encontré mi hogar en vos","Como Jin-Woo se volvió más fuerte, nuestro amor se hace invencible","Este amor es nuestro propio anime épico","El amor todo lo puede","Eres mi universo","Te amo más que ayer","Nuestro amor es infinito","Eres mi estrella favorita","Mi corazón es tuyo"],planets=[{name:"Amor",size:16,color:"#ff4d88",radius:150,speed:40},{name:"Pasión",size:18,color:"#ff3366",radius:220,speed:35},{name:"Ternura",size:14,color:"#ff99cc",radius:290,speed:30},{name:"Compromiso",size:20,color:"#cc66ff",radius:360,speed:25},{name:"Complicidad",size:15,color:"#9966ff",radius:430,speed:20},{name:"Respeto",size:17,color:"#6699ff",radius:500,speed:15},{name:"Confianza",size:19,color:"#66ccff",radius:570,speed:10},{name:"Eternidad",size:22,color:"#ffcc66",radius:640,speed:5}];let currentPhraseIndex=0;function showFloatingPhrase(){const e=document.getElementById("floating-phrase");e.textContent=floatingPhrases[currentPhraseIndex],e.classList.add("visible"),setTimeout((function(){e.classList.remove("visible"),currentPhraseIndex=(currentPhraseIndex+1)%floatingPhrases.length,setTimeout(showFloatingPhrase,2e3)}),4e3)}function createStars(){const e=document.getElementById("stars");for(let t=0;t<200;t++){const a=document.createElement("div");a.className="star";const s=3*Math.random();a.style.cssText="width:"+s+"px;height:"+s+"px;left:"+100*Math.random()+"%;top:"+100*Math.random()+"%;animation-duration:"+(5*Math.random()+3)+"s",e.appendChild(a)}}function createSolarSystem(){const e=document.getElementById("orbits-container"),t=document.createElement("style");t.textContent="@keyframes orbit{from{transform:rotate(0deg)translateX(var(--r))rotate(0deg)}to{transform:rotate(360deg)translateX(var(--r))rotate(-360deg)}}",document.head.appendChild(t),planets.forEach((function(t,a){const s=document.createElement("div");s.className="orbit",s.style.cssText="width:"+2*t.radius+"px;height:"+2*t.radius+"px",e.appendChild(s);const r=document.createElement("div");r.className="planet",r.style.cssText="width:"+t.size+"px;height:"+t.size+"px;background:"+t.color+";animation:orbit "+t.speed+"s linear infinite;--r:"+t.radius+"px;transform:rotate("+360*Math.random()+"deg)translateX("+t.radius+"px)rotate(-"+360*Math.random()+"deg)",r.onclick=function(){document.getElementById("modal-text").textContent=phrases[a],document.getElementById("modal").classList.add("active")},e.appendChild(r)}))}document.getElementById("modal-close").onclick=function(){return document.getElementById("modal").classList.remove("active")},document.getElementById("modal").onclick=function(e){"modal"===e.target.id&&e.target.classList.remove("active")},createStars(),createSolarSystem(),setTimeout(showFloatingPhrase,2e3)<\/script></body></html>';
+        }
+
+        // ========== INIT ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            createBgStars();
+            createFloatingHearts();
+            createRocks();
+            initPreloader();
+            initNavigation();
+            initMusic();
+            initConstellation();
+            initPortal();
+        });
+    </script>
+</body>
+</html>

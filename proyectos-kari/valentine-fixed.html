@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Kari — San Valentín</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --night-deep: #0a0a1a;
+            --night-mid: #12122a;
+            --night-soft: #1a1a3a;
+            --accent-violet: #6b5b95;
+            --accent-indigo: #4a4a8a;
+            --silver: rgba(220, 220, 255, 0.9);
+            --gold: rgba(212, 175, 55, 0.85);
+            --mist: rgba(180, 190, 220, 0.08);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(180deg, var(--night-deep) 0%, var(--night-mid) 40%, var(--night-soft) 70%, var(--night-deep) 100%);
+            color: var(--silver);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.5;
+        }
+
+        /* ========== Capas: estado por defecto ========== */
+        .layer {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            z-index: 1;
+        }
+        .layer.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .layer { overflow: hidden; }
+
+        /* ========== Fondo común: estrellas + bruma ========== */
+        .bg-stars {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.25; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.1); }
+        }
+        .mist {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 50% at 50% 20%, var(--mist), transparent 60%);
+            pointer-events: none;
+        }
+
+        /* ========== CAPA 0 — Preloader ========== */
+        .preloader-text {
+            font-size: clamp(1rem, 3vw, 1.25rem);
+            color: var(--silver);
+            text-align: center;
+            max-width: 320px;
+            margin-bottom: 1.5rem;
+        }
+        .preloader-bar {
+            width: 160px;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .preloader-fill {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent-violet), var(--gold));
+            border-radius: 3px;
+            animation: load 2.5s ease-in-out forwards;
+        }
+        @keyframes load {
+            to { width: 100%; }
+        }
+        .btn-skip {
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.4);
+            color: var(--silver);
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .btn-skip:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+        /* ========== CAPA 1 — Hero ========== */
+        .hero-title {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            color: white;
+            text-shadow: 0 0 20px rgba(107, 91, 149, 0.4);
+        }
+        .hero-sub {
+            font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+            text-align: center;
+            max-width: 420px;
+            margin-bottom: 2rem;
+            color: rgba(220, 220, 255, 0.85);
+        }
+        .hero-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        .btn {
+            padding: 0.85rem 1.6rem;
+            border-radius: 999px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            min-height: 48px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-violet), var(--accent-indigo));
+            color: white;
+            box-shadow: 0 4px 20px rgba(107, 91, 149, 0.4);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(107, 91, 149, 0.5); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--silver);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-secondary.active { border-color: var(--gold); color: var(--gold); }
+
+        /* Constelación interactiva */
+        .constellation-wrap {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 80px;
+        }
+        .constellation-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+        .constellation-wrap .star-dot {
+            fill: rgba(255,255,255,0.4);
+            transition: fill 0.3s, filter 0.3s;
+        }
+        .constellation-wrap:hover .star-dot,
+        .constellation-wrap.touched .star-dot { fill: var(--silver); filter: drop-shadow(0 0 6px rgba(212,175,55,0.6)); }
+
+        /* ========== Pasos subida Monserrate — MEJORADO estilo montaña ========== */
+        .phase-visual {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+        }
+        .phase-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.85;
+            transition: transform 0.8s ease, opacity 0.6s ease;
+        }
+        .layer.active .phase-visual img {
+            transform: scale(1.03);
+            opacity: 0.92;
+        }
+        
+        /* NUEVO: Gradiente de montaña más dramático */
+        .phase-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, 
+                rgba(10,10,26,0.95) 0%, 
+                rgba(10,10,26,0.7) 20%,
+                rgba(10,10,26,0.4) 50%, 
+                transparent 80%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .phase-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            min-height: 100%;
+            padding: 2rem 1.5rem 3rem;
+            text-align: center;
+        }
+        .layer .phase-content {
+            animation: phaseIn 0.7s ease forwards;
+        }
+        @keyframes phaseIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* NUEVO: Indicador de altitud estilo montaña */
+        .altitude-indicator {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--gold);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        .altitude-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+        }
+        .altitude-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.8;
+        }
+        
+        /* NUEVO: Barra de progreso vertical estilo montaña */
+        .mountain-progress {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: rgba(255,255,255,0.15);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .mountain-progress-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to top, var(--accent-violet), var(--gold));
+            transition: height 0.6s ease;
+            border-radius: 2px;
+        }
+        
+        /* Marcadores de puntos en la montaña */
+        .mountain-markers {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 11;
+        }
+        .mountain-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .mountain-marker.passed {
+            background: var(--accent-violet);
+            border-color: var(--accent-violet);
+            box-shadow: 0 0 10px var(--accent-violet);
+        }
+        .mountain-marker.current {
+            background: var(--gold);
+            border-color: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
+            transform: scale(1.3);
+        }
+        .mountain-marker::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+            white-space: nowrap;
+            color: rgba(255,255,255,0.7);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mountain-marker.current::after,
+        .mountain-marker:hover::after {
+            opacity: 1;
+        }
+        
+        .paso-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gold);
+            margin-bottom: 0.75rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+        .paso-text {
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
+            text-align: center;
+            max-width: 420px;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            color: var(--silver);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+        }
+        .paso-ref {
+            font-size: 0.8rem;
+            color: rgba(220,220,255,0.6);
+            margin-top: 0.5rem;
+        }
+        
+        /* Progreso horizontal original (ahora oculto, reemplazado por vertical) */
+        .paso-progress {
+            display: none;
+        }
+
+        /* ========== Portal / transición ========== */
+        .portal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: radial-gradient(ellipse at center, transparent 0%, var(--night-deep) 70%);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 1s ease, visibility 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .portal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .portal-overlay .message {
+            color: var(--silver);
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            text-align: center;
+            max-width: 320px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
+        }
+        .portal-overlay.active .message { opacity: 1; transform: scale(1); }
+        .portal-overlay.zoom .message { opacity: 0; }
+        .portal-overlay.zoom { background: var(--night-deep); }
+        
+        /* CORREGIDO: iframe del universo */
+        .portal-universe-iframe {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 10001;
+            background: #0a0a2a;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        .portal-universe-iframe.visible {
+            display: block;
+            opacity: 1;
+        }
+        .portal-overlay.hide-for-iframe {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        /* Notas musicales (modo música) */
+        .note-float {
+            position: fixed;
+            font-size: 1.5rem;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 2;
+            animation: noteDrift 8s linear infinite;
+        }
+        @keyframes noteDrift {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-100px) rotate(180deg); opacity: 0; }
+        }
+
+        /* Responsive y accesibilidad */
+        @media (max-width: 768px) {
+            .altitude-indicator {
+                top: 1rem;
+                right: 1rem;
+                font-size: 0.75rem;
+            }
+            .altitude-number {
+                font-size: 1.2rem;
+            }
+            .mountain-progress {
+                height: 50%;
+            }
+            .mountain-markers {
+                height: 50%;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .hero-btns { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+        .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+        /* Accesorios amor a distancia: avión, Argentina, Colombia */
+        .accesorios-distancia {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0.9;
+        }
+        .accesorios-distancia img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+            animation: accesoriosFloat 4s ease-in-out infinite;
+        }
+        .accesorios-distancia img:nth-child(1) { animation-delay: 0s; }
+        .accesorios-distancia img:nth-child(2) { animation-delay: 0.5s; }
+        .accesorios-distancia img:nth-child(3) { animation-delay: 1s; }
+        .accesorios-distancia img:nth-child(4) { animation-delay: 1.5s; }
+        .accesorios-distancia img:nth-child(5) { animation-delay: 2s; }
+        @keyframes accesoriosFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .music-credit {
+            position: fixed;
+            bottom: 0.25rem;
+            right: 0.5rem;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.4);
+            z-index: 6;
+        }
+        
+        /* NUEVO: Overlay de error para debugging */
+        .error-overlay {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,0,0,0.8);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            z-index: 10000;
+            display: none;
+        }
+        .error-overlay.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Error overlay para debugging -->
+    <div class="error-overlay" id="error-overlay"></div>
+
+    <!-- Música en línea (estilo Given / emocional) -->
+    <audio id="bg-music" loop preload="metadata" aria-label="Música de fondo">
+        <source id="music-source-online" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+        <source id="music-source-local" src="music/bg.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="bg-stars" id="bg-stars" aria-hidden="true"></div>
+    <div class="mist" aria-hidden="true"></div>
+
+    <!-- Accesorios: amor a distancia — Argentina ↔ Colombia -->
+    <div class="accesorios-distancia" aria-hidden="true">
+        <!-- Placeholder SVG para cuando no hay imágenes -->
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#75AADB" stroke="white" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="white" font-size="12">AR</text></svg>
+        <svg width="36" height="36" viewBox="0 0 36 36"><path d="M4 18 L32 18 M18 4 L32 18 L18 32 Z" fill="none" stroke="white" stroke-width="2"/></svg>
+        <svg width="36" height="36" viewBox="0 0 36 36"><path d="M18 8 C18 8 10 14 10 20 C10 26 14 28 18 28 C22 28 26 26 26 20 C26 14 18 8 18 8 Z" fill="#E74856" stroke="white" stroke-width="2"/></svg>
+        <svg width="36" height="36" viewBox="0 0 36 36"><path d="M4 18 L32 18 M18 4 L32 18 L18 32 Z" fill="none" stroke="white" stroke-width="2"/></svg>
+        <svg width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="#FCD116" stroke="white" stroke-width="2"/><text x="18" y="22" text-anchor="middle" fill="white" font-size="12">CO</text></svg>
+    </div>
+    <p class="music-credit" id="music-credit" aria-hidden="true">Música: SoundHelix (T. Schürger)</p>
+
+    <!-- CAPA 0 — Preloader -->
+    <section class="layer active" id="layer0" aria-label="Pantalla de carga">
+        <p class="preloader-text">Acomodá el brillo… esto es para vos, Kari.</p>
+        <div class="preloader-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="preloader-fill" id="preloader-fill"></div>
+        </div>
+        <button type="button" class="btn-skip" id="skip-intro" aria-label="Saltar introducción">Saltar</button>
+    </section>
+
+    <!-- CAPA 1 — Hero -->
+    <section class="layer" id="layer1" aria-label="Bienvenida">
+        <div class="constellation-wrap" id="constellation" role="img" aria-label="Constelación">
+            <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+                <line x1="20" y1="40" x2="50" y2="20" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="50" y1="20" x2="70" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <line x1="70" y1="50" x2="100" y2="40" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                <circle class="star-dot" cx="20" cy="40" r="3"/>
+                <circle class="star-dot" cx="50" cy="20" r="3"/>
+                <circle class="star-dot" cx="70" cy="50" r="3"/>
+                <circle class="star-dot" cx="100" cy="40" r="3"/>
+            </svg>
+        </div>
+        <h1 class="hero-title" id="hero-title">Kari, subamos a Monserrate.</h1>
+        <p class="hero-sub" id="hero-sub">3.152 metros. 1.605 escalones. Bogotá nos espera arriba — y algo más.</p>
+        <div class="hero-btns">
+            <button type="button" class="btn btn-primary" id="start-walk" aria-label="Empezar subida">Empezar subida</button>
+            <button type="button" class="btn btn-secondary" id="toggle-music" aria-label="Modo música (Given)">Modo música</button>
+        </div>
+    </section>
+
+    <!-- Pasos: Base → Camino → Mirador → Último tramo → Cima (cada uno con imagen de fondo placeholder) -->
+    <section class="layer" id="layer2" aria-label="Paso 1 — Base">
+        <div class="phase-visual">
+            <!-- Placeholder gradient cuando no hay imagen -->
+            <div style="width:100%;height:100%;background:linear-gradient(to bottom, #1a1a3a, #2a2a4a);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <!-- NUEVO: Indicadores de montaña -->
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.550m</div>
+            <div class="altitude-label">Base</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 0%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker" data-label="Mirador"></div>
+            <div class="mountain-marker" data-label="Camino"></div>
+            <div class="mountain-marker current" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 1 — Base del cerro</p>
+            <p class="paso-text" id="paso1-text">2.350 metros de sendero. 1.605 escalones. La ciudad queda abajo y la cima arriba. <span class="paso-ref">Monserrate, Bogotá</span></p>
+            <button type="button" class="btn btn-primary" data-next="3" aria-label="Siguiente">Empezar a subir →</button>
+        </div>
+    </section>
+    
+    <section class="layer" id="layer3" aria-label="Paso 2 — Camino">
+        <div class="phase-visual">
+            <div style="width:100%;height:100%;background:linear-gradient(to bottom, #2a2a4a, #1a1a3a);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.700m</div>
+            <div class="altitude-label">En ascenso</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 25%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker" data-label="Mirador"></div>
+            <div class="mountain-marker current" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 2 — En el camino</p>
+            <p class="paso-text" id="paso2-text">No hace falta licencia para ir juntos. Solo ganas de ver el mundo. <span class="paso-ref">Hunter x Hunter</span></p>
+            <button type="button" class="btn btn-primary" data-next="4" aria-label="Siguiente">Continuar subiendo →</button>
+        </div>
+    </section>
+    
+    <section class="layer" id="layer4" aria-label="Paso 3 — Mirador">
+        <div class="phase-visual">
+            <div style="width:100%;height:100%;background:linear-gradient(to bottom, #3a3a5a, #2a2a4a);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">2.850m</div>
+            <div class="altitude-label">Mirador</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 50%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker" data-label="Último"></div>
+            <div class="mountain-marker current" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 3 — Mirador</p>
+            <p class="paso-text" id="paso3-text">Hay melodías que no se oyen: se sienten. Y vos me sonás a hogar. <span class="paso-ref">Given — Fuyu no Hanashi</span></p>
+            <button type="button" class="btn btn-primary" data-next="5" aria-label="Siguiente">Ya casi llegamos →</button>
+        </div>
+    </section>
+    
+    <section class="layer" id="layer5" aria-label="Paso 4 — Último tramo">
+        <div class="phase-visual">
+            <div style="width:100%;height:100%;background:linear-gradient(to bottom, #4a4a6a, #3a3a5a);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">3.000m</div>
+            <div class="altitude-label">Último tramo</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 75%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker" data-label="Cima"></div>
+            <div class="mountain-marker current" data-label="Último"></div>
+            <div class="mountain-marker passed" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Paso 4 — Último tramo</p>
+            <p class="paso-text" id="paso4-text">Construir algo que importe, paso a paso. Como el ingeniero que no se rinde. <span class="paso-ref">El mejor ingeniero del mundo / Solo Leveling</span></p>
+            <button type="button" class="btn btn-primary" data-next="6" aria-label="Siguiente">¡A la cima! →</button>
+        </div>
+    </section>
+    
+    <section class="layer" id="layer6" aria-label="Paso 5 — Cima">
+        <div class="phase-visual">
+            <div style="width:100%;height:100%;background:linear-gradient(to bottom, #5a5a7a, #4a4a6a);"></div>
+        </div>
+        <div class="phase-overlay"></div>
+        
+        <div class="altitude-indicator">
+            <div class="altitude-number">3.152m</div>
+            <div class="altitude-label">¡Cima!</div>
+        </div>
+        
+        <div class="mountain-progress">
+            <div class="mountain-progress-fill" style="height: 100%;"></div>
+        </div>
+        
+        <div class="mountain-markers">
+            <div class="mountain-marker current" data-label="Cima"></div>
+            <div class="mountain-marker passed" data-label="Último"></div>
+            <div class="mountain-marker passed" data-label="Mirador"></div>
+            <div class="mountain-marker passed" data-label="Camino"></div>
+            <div class="mountain-marker passed" data-label="Base"></div>
+        </div>
+        
+        <div class="phase-content">
+            <p class="paso-label">Cima — Monserrate</p>
+            <p class="paso-text" id="paso5-text">Desde acá Bogotá es un mapa de luces. Y lo que importa es que llegamos juntos. <span class="paso-ref">Kari</span></p>
+            <button type="button" class="btn btn-primary" id="go-summit" aria-label="Ver el universo">Ver nuestro universo ✦</button>
+        </div>
+    </section>
+
+    <!-- Portal: mensaje y luego iframe con el universo (Sistema Solar) -->
+    <div class="portal-overlay" id="portal" aria-live="polite">
+        <p class="message">Llegamos, Kari… mirá nuestro universo.</p>
+    </div>
+
+    <!-- CORREGIDO: iframe se crea dinámicamente -->
+    
+    <script>
+        // ========== CONFIGURACIÓN ==========
+        const CONFIG = {
+            preloaderDuration: 2800,
+            portalMessageDelay: 2200,
+            portalZoomDelay: 3800,
+            musicVolume: 0.5,
+            enableDebug: true // Cambiar a false en producción
+        };
+
+        // ========== UTILIDADES ==========
+        function logError(message, error) {
+            if (CONFIG.enableDebug) {
+                console.error(message, error);
+                const errorOverlay = document.getElementById('error-overlay');
+                if (errorOverlay) {
+                    errorOverlay.textContent = message;
+                    errorOverlay.classList.add('show');
+                    setTimeout(() => errorOverlay.classList.remove('show'), 5000);
+                }
+            }
+        }
+
+        // ========== STATE MANAGEMENT ==========
+        let state = 0;
+        const layers = Array.from({ length: 7 }, (_, i) => document.getElementById(`layer${i}`));
+        let musicMode = false;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function goToLayer(n) {
+            if (n < 0 || n >= layers.length) return;
+            layers.forEach((el, i) => el?.classList.toggle('active', i === n));
+            state = n;
+        }
+
+        // ========== ESTRELLAS DE FONDO ==========
+        function createBgStars() {
+            const container = document.getElementById('bg-stars');
+            if (!container) return;
+            
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'bg-star';
+                const size = 1 + Math.random() * 2;
+                star.style.cssText = `
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                    animation-delay: ${Math.random() * 4}s;
+                    animation-duration: ${3 + Math.random() * 3}s;
+                `;
+                container.appendChild(star);
+            }
+        }
+
+        // ========== PRELOADER ==========
+        function initPreloader() {
+            const preloaderFill = document.getElementById('preloader-fill');
+            const skipBtn = document.getElementById('skip-intro');
+            
+            function finishPreload() {
+                if (preloaderFill) {
+                    preloaderFill.style.animation = 'none';
+                    preloaderFill.style.width = '100%';
+                }
+                goToLayer(1);
+            }
+            
+            if (!reduceMotion) {
+                const timer = setTimeout(finishPreload, CONFIG.preloaderDuration);
+                skipBtn?.addEventListener('click', () => {
+                    clearTimeout(timer);
+                    finishPreload();
+                });
+            } else {
+                finishPreload();
+            }
+        }
+
+        // ========== NAVEGACIÓN ==========
+        function initNavigation() {
+            // Botón principal de inicio
+            document.getElementById('start-walk')?.addEventListener('click', () => goToLayer(2));
+            
+            // Botones "Siguiente" en cada paso
+            document.querySelectorAll('.layer .btn-primary[data-next]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const next = parseInt(btn.getAttribute('data-next'), 10);
+                    goToLayer(next);
+                });
+            });
+            
+            // Teclado: flecha derecha o espacio para avanzar
+            document.addEventListener('keydown', (e) => {
+                if (state >= 2 && state <= 5 && (e.key === 'ArrowRight' || e.key === ' ')) {
+                    e.preventDefault();
+                    goToLayer(state + 1);
+                }
+            });
+        }
+
+        // ========== MÚSICA ==========
+        function initMusic() {
+            const bgMusic = document.getElementById('bg-music');
+            const musicCredit = document.getElementById('music-credit');
+            const toggleMusic = document.getElementById('toggle-music');
+            let noteInterval;
+            
+            if (musicCredit) musicCredit.style.display = 'none';
+            
+            toggleMusic?.addEventListener('click', () => {
+                musicMode = !musicMode;
+                toggleMusic.classList.toggle('active', musicMode);
+                
+                if (musicMode) {
+                    if (bgMusic) {
+                        bgMusic.volume = CONFIG.musicVolume;
+                        bgMusic.play().catch(err => logError('Error reproduciendo música', err));
+                    }
+                    if (musicCredit) musicCredit.style.display = 'block';
+                    
+                    // Notas flotantes
+                    if (!noteInterval) {
+                        const notes = ['♪', '♫', '♬', '♩'];
+                        noteInterval = setInterval(() => {
+                            const note = document.createElement('span');
+                            note.className = 'note-float';
+                            note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                            note.style.cssText = `
+                                left: ${Math.random() * 100}%;
+                                animation-duration: ${6 + Math.random() * 4}s;
+                                animation-delay: -${Math.random() * 2}s;
+                            `;
+                            document.body.appendChild(note);
+                            setTimeout(() => note.remove(), 10000);
+                        }, 1200);
+                    }
+                } else {
+                    if (bgMusic) bgMusic.pause();
+                    if (musicCredit) musicCredit.style.display = 'none';
+                    if (noteInterval) {
+                        clearInterval(noteInterval);
+                        noteInterval = null;
+                    }
+                }
+            });
+        }
+
+        // ========== CONSTELACIÓN ==========
+        function initConstellation() {
+            const constellation = document.getElementById('constellation');
+            if (!constellation) return;
+            
+            constellation.addEventListener('mouseenter', () => constellation.classList.add('touched'));
+            constellation.addEventListener('mouseleave', () => constellation.classList.remove('touched'));
+            constellation.addEventListener('touchstart', () => constellation.classList.add('touched'), { passive: true });
+        }
+
+        // ========== PORTAL + UNIVERSO (CORREGIDO) ==========
+        function initPortal() {
+            const goSummitBtn = document.getElementById('go-summit');
+            const portal = document.getElementById('portal');
+            
+            goSummitBtn?.addEventListener('click', () => {
+                portal?.classList.add('active');
+                
+                // Zoom del portal
+                setTimeout(() => {
+                    portal?.classList.add('zoom');
+                    const msg = portal?.querySelector('.message');
+                    if (msg) msg.textContent = '';
+                }, CONFIG.portalMessageDelay);
+                
+                // Cargar universo
+                setTimeout(() => {
+                    loadUniverse();
+                }, CONFIG.portalZoomDelay);
+            });
+        }
+
+        // CORREGIDO: Cargar el universo en un iframe
+        function loadUniverse() {
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'universe-iframe';
+                iframe.className = 'portal-universe-iframe';
+                iframe.title = 'Sistema Solar del Amor';
+                document.body.appendChild(iframe);
+                
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                doc.open();
+                doc.write(getUniverseHTML());
+                doc.close();
+                
+                setTimeout(() => {
+                    iframe.classList.add('visible');
+                    document.getElementById('portal')?.classList.add('hide-for-iframe');
+                }, 100);
+            } catch (error) {
+                logError('Error cargando universo', error);
+            }
+        }
+
+        // HTML del universo (Sistema Solar)
+        function getUniverseHTML() {
+            return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Solar del Amor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            height: 100vh;
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a, #0a0a2a);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            perspective: 1000px;
+        }
+        .solar-system {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            transform-origin: center;
+            transition: transform 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            width: 100vmax;
+            height: 100vmax;
+        }
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle linear infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+        .sun {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 160px;
+            height: 160px;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+        .heart {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            transform: rotate(45deg);
+            background: linear-gradient(135deg, #ff6ea3 0%, #ff3d6e 60%);
+            box-shadow: 0 0 30px rgba(255,90,140,0.6), 0 0 80px rgba(255,60,110,0.35);
+            filter: drop-shadow(0 0 20px rgba(255,90,140,0.25));
+            animation: heartPulse 1.8s ease-in-out infinite;
+            border-radius: 6px;
+        }
+        .heart:before,
+        .heart:after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: inherit;
+            box-shadow: inherit;
+        }
+        .heart:before { top: -50px; left: 0; }
+        .heart:after  { left: 50px; top: 0; }
+        @keyframes heartPulse {
+            0%   { transform: rotate(45deg) scale(1); }
+            50%  { transform: rotate(45deg) scale(1.12); }
+            100% { transform: rotate(45deg) scale(1); }
+        }
+        .mini-heart {
+            position: absolute;
+            font-size: 16px;
+            line-height: 1;
+            pointer-events: none;
+            opacity: 0;
+            animation: miniFloat 5.5s infinite ease-in-out;
+            text-shadow: 0 0 8px rgba(255,100,150,0.6);
+        }
+        @keyframes miniFloat {
+            0%   { transform: translate(0,0) scale(0.6); opacity: 0; }
+            20%  { opacity: 1; }
+            60%  { transform: translate(var(--tx, -20px), var(--ty, -80px)) scale(1); opacity: 1; }
+            100% { transform: translate(calc(var(--tx, -20px) * 1.2), calc(var(--ty, -80px) * 1.2)) scale(0.8); opacity: 0; }
+        }
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            transform-origin: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        .planet:hover {
+            transform: scale(1.5);
+            z-index: 100;
+        }
+        .planet-hover-text {
+            position: absolute;
+            color: white;
+            font-size: 12px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 8px;
+            border-radius: 10px;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .planet:hover .planet-hover-text {
+            opacity: 1;
+        }
+        .floating-phrase {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: float 15s infinite linear;
+            pointer-events: none;
+            z-index: 5;
+            text-align: center;
+            width: 120px;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+        .floating-phrase.visible {
+            opacity: 1;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) rotate(360deg); opacity: 0; }
+        }
+        .shooting-star {
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            text-shadow: 0 0 10px currentColor;
+            animation: shootStar 5s linear forwards;
+        }
+        @keyframes shootStar {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translate(var(--star-tx), var(--star-ty)) rotate(var(--star-r)); opacity: 0; }
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #2c1b47, #1a1a4a);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 80%;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.5);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: transform 0.5s ease, opacity 0.5s ease;
+            border: 1px solid rgba(255, 105, 180, 0.3);
+        }
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 105, 180, 0.7);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+            transition: background 0.3s;
+        }
+        .zoom-btn:hover {
+            background: rgba(255, 105, 180, 1);
+        }
+        .zoom-level {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        @media (max-width: 768px) {
+            .sun { width: 100px; height: 100px; }
+            .heart { width: 60px; height: 60px; }
+            .heart:before, .heart:after { width: 60px; height: 60px; }
+            .heart:before { top: -30px; }
+            .heart:after { left: 30px; }
+            .floating-phrase { font-size: 12px; width: 100px; }
+            .zoom-controls { bottom: 10px; right: 10px; }
+            .zoom-btn { width: 35px; height: 35px; font-size: 16px; }
+            .zoom-level { bottom: 55px; right: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="solar-system" id="solar-system">
+        <div class="sun">
+            <div class="heart"></div>
+            <div class="mini-heart" style="left:-50px; top:18px; animation-delay:0s;">❤</div>
+            <div class="mini-heart" style="left:36px; top:-46px; animation-delay:0.6s;">❤</div>
+            <div class="mini-heart" style="left:80px; top:30px; animation-delay:1.2s;">❤</div>
+            <div class="mini-heart" style="left:-10px; top:-78px; animation-delay:1.8s;">❤</div>
+        </div>
+        <div id="orbits-container"></div>
+        <div id="floating-phrases"></div>
+    </div>
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            <p id="modal-text"></p>
+        </div>
+    </div>
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoom-in">+</button>
+        <button class="zoom-btn" id="zoom-out">-</button>
+    </div>
+    <div class="zoom-level" id="zoom-level">Zoom: 100%</div>
+
+    <script>
+        const planetClickPhrases = [
+            "Desde que llegaste a mi vida, todo tiene sentido.",
+            "A tu lado descubrí que el amor verdadero existe.",
+            "Si tuviera que elegir entre respirar y amarte, usaría mi último aliento para decirte que te amo.",
+            "Nuestro amor es como el universo: infinito, misterioso y lleno de maravillas.",
+            "Eres la melodía que alegra mi corazón, la poesía que da sentido a mis días.",
+            "Amo cada parte de ti: tu sonrisa, tu voz, tu mirada.",
+            "Entre miles de millones de personas, encontré a mi alma gemela.",
+            "Prometo amarte en cada vida, en cada universo, en cada realidad posible."
+        ];
+        
+        const floatingPhrases = [
+            "El amor todo lo puede", "Eres mi universo", "Te amo más que ayer", "Nuestro amor es infinito",
+            "Eres mi estrella favorita", "Mi corazón es tuyo", "Juntos somos más", "Eres mi destino",
+            "Amor eterno", "Eres mi razón de ser", "Mi amor por ti crece cada día", "Eres mi paraíso"
+        ];
+        
+        const shootingStarPhrases = [
+            "¡Eres increíble!", "Mi amor por ti brilla", "Eres mi deseo cumplido",
+            "Juntos somos magia", "Nuestro amor es cósmico"
+        ];
+        
+        const planets = [
+            { name: "Amor", size: 16, color: "#ff4d88", orbitRadius: 150, speed: 40 },
+            { name: "Pasión", size: 18, color: "#ff3366", orbitRadius: 220, speed: 35 },
+            { name: "Ternura", size: 14, color: "#ff99cc", orbitRadius: 290, speed: 30 },
+            { name: "Compromiso", size: 20, color: "#cc66ff", orbitRadius: 360, speed: 25 },
+            { name: "Complicidad", size: 15, color: "#9966ff", orbitRadius: 430, speed: 20 },
+            { name: "Respeto", size: 17, color: "#6699ff", orbitRadius: 500, speed: 15 },
+            { name: "Confianza", size: 19, color: "#66ccff", orbitRadius: 570, speed: 10 },
+            { name: "Eternidad", size: 22, color: "#ffcc66", orbitRadius: 640, speed: 5 }
+        ];
+        
+        let currentZoom = 1;
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 3;
+                star.style.cssText = \`
+                    width: \${size}px;
+                    height: \${size}px;
+                    left: \${Math.random() * 100}%;
+                    top: \${Math.random() * 100}%;
+                    animation-duration: \${Math.random() * 5 + 3}s;
+                    animation-delay: \${Math.random() * 5}s;
+                \`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function createSolarSystem() {
+            const orbitsContainer = document.getElementById('orbits-container');
+            const style = document.createElement('style');
+            style.textContent = '@keyframes orbit { from { transform: rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg); } to { transform: rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg); } }';
+            document.head.appendChild(style);
+            
+            planets.forEach((planet, index) => {
+                const orbit = document.createElement('div');
+                orbit.className = 'orbit';
+                orbit.style.cssText = \`width: \${planet.orbitRadius * 2}px; height: \${planet.orbitRadius * 2}px;\`;
+                orbitsContainer.appendChild(orbit);
+                
+                const planetEl = document.createElement('div');
+                planetEl.className = 'planet';
+                planetEl.style.cssText = \`
+                    width: \${planet.size}px;
+                    height: \${planet.size}px;
+                    background-color: \${planet.color};
+                    animation: orbit \${planet.speed}s linear infinite;
+                    --orbit-radius: \${planet.orbitRadius}px;
+                    transform: rotate(\${Math.random() * 360}deg) translateX(\${planet.orbitRadius}px) rotate(-\${Math.random() * 360}deg);
+                \`;
+                
+                const hoverText = document.createElement('div');
+                hoverText.className = 'planet-hover-text';
+                hoverText.textContent = planet.name;
+                planetEl.appendChild(hoverText);
+                
+                planetEl.addEventListener('click', () => showModal(planetClickPhrases[index]));
+                orbitsContainer.appendChild(planetEl);
+            });
+        }
+
+        function createFloatingPhrases() {
+            const container = document.getElementById('floating-phrases');
+            floatingPhrases.forEach((text, i) => {
+                const phrase = document.createElement('div');
+                phrase.className = 'floating-phrase';
+                phrase.textContent = text;
+                phrase.style.cssText = \`
+                    left: \${Math.random() * 100}%;
+                    top: \${Math.random() * 100}%;
+                    --tx: \${(Math.random() - 0.5) * 200}vw;
+                    --ty: \${(Math.random() - 0.5) * 200}vh;
+                    animation-duration: \${Math.random() * 10 + 15}s;
+                    animation-delay: \${Math.random() * 5}s;
+                \`;
+                if (i < 15) phrase.classList.add('visible');
+                container.appendChild(phrase);
+            });
+        }
+
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.textContent = shootingStarPhrases[Math.floor(Math.random() * shootingStarPhrases.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 100 + Math.random() * 100;
+            star.style.cssText = \`
+                left: \${Math.random() * 100}%;
+                top: \${Math.random() * 100}%;
+                --star-tx: \${Math.cos(angle) * distance}vw;
+                --star-ty: \${Math.sin(angle) * distance}vh;
+                --star-r: \${Math.random() * 360}deg;
+            \`;
+            document.body.appendChild(star);
+            setTimeout(() => star.remove(), 5000);
+        }
+
+        function showModal(text) {
+            document.getElementById('modal-text').textContent = text;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function applyZoom() {
+            document.getElementById('solar-system').style.transform = \`translate(-50%, -50%) scale(\${currentZoom})\`;
+            document.getElementById('zoom-level').textContent = 'Zoom: ' + Math.round(currentZoom * 100) + '%';
+        }
+
+        // Event listeners
+        document.getElementById('modal-close').addEventListener('click', () => 
+            document.getElementById('modal').classList.remove('active'));
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') document.getElementById('modal').classList.remove('active');
+        });
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            currentZoom = Math.min(3, currentZoom + 0.2);
+            applyZoom();
+        });
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            currentZoom = Math.max(0.5, currentZoom - 0.2);
+            applyZoom();
+        });
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            currentZoom = e.deltaY < 0 ? Math.min(3, currentZoom + 0.1) : Math.max(0.5, currentZoom - 0.1);
+            applyZoom();
+        });
+
+        // Initialize
+        createStars();
+        createSolarSystem();
+        createFloatingPhrases();
+        setInterval(() => {
+            setTimeout(createShootingStar, Math.random() * 5000 + 3000);
+        }, 1000);
+    <\/script>
+</body>
+</html>`;
+        }
+
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            createBgStars();
+            initPreloader();
+            initNavigation();
+            initMusic();
+            initConstellation();
+            initPortal();
+        });
+    </script>
+</body>
+</html>
